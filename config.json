@@ -1,6 +1,0 @@
-{
-  "apify_token": "YOUR_APIFY_TOKEN",
-  "telegram_token": "YOUR_TELEGRAM_BOT_TOKEN",
-  "telegram_chat_id": "YOUR_TELEGRAM_CHAT_ID",
-  "facebook_page_url": "https://www.facebook.com/SomeCompanyName"
-}
