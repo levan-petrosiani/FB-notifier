@@ -1,29 +1,36 @@
 import json
-import requests
 import time
+import os
+import requests
+from dotenv import load_dotenv
+from apify_client import ApifyClient
 
-CONFIG = json.load(open("config.json"))
+# Load .env
+load_dotenv()
+
+APIFY_TOKEN = os.getenv("APIFY_TOKEN")
+PAGE_URL = os.getenv("PAGE_URL")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
 LAST = json.load(open("last_post.json"))
 
-APIFY_TOKEN = CONFIG["apify_token"]
-PAGE_URL = CONFIG["facebook_page_url"]
-TELEGRAM_TOKEN = CONFIG["telegram_token"]
-CHAT_ID = CONFIG["telegram_chat_id"]
+# Initialize the Apify client
+client = ApifyClient(APIFY_TOKEN)
 
 def get_latest_post():
     """Fetch latest post from Apify Facebook Page Scraper"""
-    actor_url = "https://api.apify.com/v2/acts/apify~facebook-pages-scraper/run-sync-get-dataset-items"
-    params = {
-        "token": APIFY_TOKEN,
+    actor = client.actor("apify/facebook-pages-scraper")
+    run = actor.call(run_input={
         "pageUrls": [PAGE_URL],
         "resultsLimit": 1
-    }
-    response = requests.post(actor_url, json=params)
-    response.raise_for_status()
-    data = response.json()
-    if not data:
+    })
+
+    # Get dataset items
+    dataset_items = list(client.dataset(run["defaultDatasetId"]).list_items().items)
+    if not dataset_items:
         return None
-    return data[0]
+    return dataset_items[0]
 
 def send_telegram(message):
     """Send message to Telegram"""
@@ -32,6 +39,11 @@ def send_telegram(message):
     requests.post(url, data=payload)
 
 def main():
+
+    print("Testing Apify connection...")
+    client.user().get()
+    print("✅ Connected to Apify successfully")
+
     while True:
         try:
             post = get_latest_post()
