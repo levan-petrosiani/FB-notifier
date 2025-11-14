@@ -15,7 +15,23 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 PAGES = [
     "https://www.facebook.com/TheBodyShopGeo",
     "https://www.facebook.com/YvesRocherGeorgia",
+    "https://www.facebook.com/TestScraperPage/"
 ]
+
+
+def get_last_post_for_page(page_url):
+    """Fetch and print the latest post for testing"""
+    try:
+        post = get_latest_post(page_url)
+        if not post:
+            print(f"No posts found for {page_url}.")
+            return
+        print("Latest post info:")
+        print(f"ID/URL: {post.get('url') or post.get('id')}")
+        print(f"Text: {post.get('text', '')}")
+        print(f"Created at: {post.get('createdAt')}")
+    except Exception as e:
+        print(f"Error fetching latest post: {e}")
 
 # Load last post info safely
 if os.path.exists("last_post.json"):
@@ -37,16 +53,22 @@ with open("last_post.json", "w") as f:
 client = ApifyClient(APIFY_TOKEN)
 
 def get_latest_post(page_url):
-    """Fetch latest post from Apify Facebook Page Scraper"""
-    actor = client.actor("apify/facebook-pages-scraper")
+    actor = client.actor("apify/facebook-posts-scraper")
     run = actor.call(run_input={
-        "pageUrls": [page_url],
+        "startUrls": [{"url": page_url}],  # ← this is required
         "resultsLimit": 1
     })
     dataset_items = list(client.dataset(run["defaultDatasetId"]).list_items().items)
-    if not dataset_items:
+    if dataset_items:
+        latest_post = dataset_items[0]
+        print("Latest post info:")
+        print("ID/URL:", latest_post.get("url"))
+        print("Text:", latest_post.get("text"))
+        return latest_post
+    else:
+        print("No posts found.")
         return None
-    return dataset_items[0]
+
 
 def send_telegram(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
@@ -76,8 +98,8 @@ def main():
         with open("last_post.json", "w") as f:
             json.dump(LAST, f, indent=4)
 
-        time.sleep(600)  # check every 10 minutes
-
+        # time.sleep(600)  # check every 10 minutes
+        time.sleep(10)
 
 if __name__ == "__main__":
     main()
