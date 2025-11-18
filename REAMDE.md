@@ -38,7 +38,7 @@ Dependencies are defined in `environment.yml`.
 ```bash
 git clone https://github.com/levan-petrosiani/FB-notifier.git
 cd FB-notifier
-````
+```
 
 ### 2. Create environment
 
