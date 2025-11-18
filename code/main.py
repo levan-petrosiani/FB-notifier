@@ -5,7 +5,7 @@ from classifier import is_offer_post
 from notifier import send_telegram
 from storage import load_last_posts, save_last_posts
 
-CHECK_INTERVAL = 43200  # 10 minutes
+CHECK_INTERVAL = 43200  # 12 hours
 
 def main():
     last_posts = load_last_posts()
