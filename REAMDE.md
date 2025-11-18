@@ -1,4 +1,4 @@
-````markdown
+
 # FB-notifier
 
 Automatically checks selected Facebook pages for **promotion / discount** posts written in Georgian and sends notifications to a Telegram chat.
